@@ -1,0 +1,586 @@
+
+== LİNUX AĞ YÖNETİMİ 2020 FİNAL PROJESİ
+
+== LİNUX NETWORKİNG
+
+=====
+
+Kişisel bilgisayarımda Virtualbox(6.0)üzerinde:
+
+* Ubuntu Desktop 20 yükledim.uPC1 olarak isimlendirdim. Kullanıcı adı olarak soyadımı seçtim.
+* TinyCore Linux (DCore Linux) yükledim. DC1 olarak isimlendirdim. Kullanıcı adı olarak ismimi seçtim.
+* Ubuntu 20 Server yükledim.userver1 olarak isimlendirdim.Kullanıcı adı olarak soyadımı seçtim.
+
+
+=====
+
+==== Makinelerin Klonlanması
+Kullanacağımız makineyi oluşturduktan sonra klon makine için sağ tıklayıp çoğalt seçeneği ile istediğimiz şekilde oluşturabiliriz.Daha az yer kaplamak ve ortak networklere beğlandığımız için MAC adresi ilkesini "Tüm ağ bağdaştırıcıları için yeni MAC adresleri oluştur" ve çoğaltma türünü "Birbirine bağlantılı çoğaltma" olarak seçtik.
+
+image::images/klonlama/upc2.png[]
+image::images/klonlama/DC2.png[]
+image::images/klonlama/userver2.png[]
+image::images/klonlama/klon.png[]
+
+* Ubuntu Desktop yükleyip uPC1 adını verdiğim sanal makinemi birbirine bağlantılı çoğaltma(klonlama) ile uPC2 adında yeni bir sanal makine klonladım.Aynı adımları uygulayarak uPC3 adını verdiğim başka bir sanal makine klonladım.
+* 	TinyCore Linux (DCore Linux) yükleyip DC1 adını verdiğim sanal makinemi birbirine bağlantılı çoğaltma(klonlama) ile DC2 adında yeni bir sanal makine klonladım.Aynı adımları uygulayarak DC3 adını verdiğim başka bir sanal makine klonladım.
+* 	Ubuntu 20 Server yükleyip userver1 adını verdiğim sanal makinemi birbirine bağlantılı çoğaltma(klonlama) ile userver2 adında yeni bir sanal makine klonladım.Aynı adımları uygulayarak userver2 adını verdiğim başka bir sanal makine klonladım.
+
+Klonlanmış Makineler:
+
+image::images/klonlama/makineler.png[]
+
+
+=== SENARYO 1
+
+1.1.NAT ile Host-Guest Ubuntu PC Bağlantısı
+
+image::images/senaryo1/upc1nat.png[]
+
+	uPC1 olarak isimlendirdiğim guest makinemin ağ bağdaştırıcısını NAT olarak seçtim.
+	
+SSH
+
+image::images/senaryo1/port.png[]
+
+    Host makineye NAT bağlantı ile erişebilmek için gerekli port yönlendirmesini yaptım.Anamakine b.noktasını 14601,misafir b.noktasını 22 olarak ayarladım.
+
+
+image::images/senaryo1/sshinstall.png[]
+
+   Gueste ssh ile bağlanabilmek için: 
+   $ sudo apt install shh ile shh yüklüyoruz.
+   
+
+image::images/senaryo1/sshh.png[]
+
+  Gerekli isim düzenlemeleri yapıldıktan sonra ssh yüklemeyi tekrar göstermek istedim.SSH yüklü olduğu için "ssh zaten en yeni sürümde" bilgisi verilmiştir.
+  
+
+image::images/senaryo1/upc1ssh.png[]
+  
+   uPC1 sanal makinesi terminalinden $ ip –c a yazarak ip adresimi 10.0.2.15 olarak buldum. 
+   Port yönlendirmesi yaptıktan sonra host(kullandığım) bilgisayardan:
+   ssh localhost –p 14601 –l gorur yazarak ssh bağlantısı yapılıp yapılmadığını kontrol ettim ve ssh bağlantısı yapılabildiğini gösterdim.
+
+PİNG
+
+image::images/senaryo1/upc1ping.png[]
+   
+ Host(kullandığım) bilgisayardan:
+ping ip adresi (10.0.2.15) ssh ile bağlandığım sanal makineye ping yapıp yapamadığımı kontrol ettim,ping yapamadığımı gösterdim.
+
+MİSAFİR EKLENTİLERİ
+
+image::images/senaryo1/misafir.png[]
+  
+   Misafir eklentilerini guest makineye sanal disk takarak yükleyebiliyoruz bu sayede hosttan gueste veya guestten hosta kopyala yapıştır ve sürükle bırak yapabiliyoruz.
+   Host bilgisayardan dosya kopyala-yapıştır yapabilmek için misafir eklentileri CD kalıbını yerleştiri seçerek Vboxguestaddition yükledim.Paylaşılan pano ve sürüklü,bırak çift yönlü seçtim.
+   
+   
+ 
+ 
+image::images/senaryo1/dosyabırak.gif[]
+
+   Host bilgisayarımda gorur.txt adında bir metin belgesi oluşturdum.Bu belgeyi sürükle bırak ile uPC1 sanal makinemin Dosyalar kısmına bıraktım.
+   
+   
+
+1.2.Köprü Bağdaştırıcı ile Host-Guest TinyCore Bağlantısı
+
+image::images/senaryo1/dc1kopru.png[]
+
+  DC1 olarak isimlendirdiğim guest makinemin ağ bağdaştırıcı ayarlarını Köprü Bağdaştırıcısı olarak ayarladım.
+ 
+  
+image::images/senaryo1/dc1ip.png[]
+
+  DC1 sanal makinesinin ip adresini bulmak için terminal ekranına $ ifconfig komutunu yazdım.İp adresini 192.168.1.41 olarak buldum.
+
+SSH
+
+image::images/senaryo1/dc1sshinstall.png[]
+
+  SSH bağlantısı yapabilmek için DC1 terminal ekranında:
+  $ cd /usr/local/etc/ssh/
+  $ sudo cp ssh_config.orig sshd_config
+  $ sudo /usr/local/etc/init.d/openssh start yazarak gerekli yüklemeleri yaptım.
+   
+
+image::images/senaryo1/dc1ssh.png[]
+
+ Host bilgisayarın terminal ekranında:
+ssh fatos@192.168.1.42 yazarak SSH bağlantısı yapılabildiğini gösterdim.
+
+PİNG
+
+image::images/senaryo1/dc1ping.png[]
+
+ Host bilgisayarın terminal ekranında:
+ssh fatos@192.168.1.42 yazarak SSH bağlantısı yapılabildiğini gösterdim.
+
+1.3.Yalnızca Anamakine Bağdaştırıcı ile Host-Guest Ubuntu Server Bağlantısı
+
+image::images/senaryo1/hostonly.png[]
+  
+  Yalnızca-anamakine bağdaştırıcı kullanabilmek için öncelikle host network oluşturmak gereklidir.Ana menüden Dosya->Anamakine Ağ Yöneticisi seçip oluştura tıklıyoruz ve network oluşuyor.
+
+image::images/senaryo1/userver1host.png[]
+
+  userver1 olarak isimlendirdiğim guest makinemin ağ bağdaştırıcı ayarlarını yalnızca-anamakine bağdaştırıcısı seçip alt seçenekten oluşturduğum host network'ü seçtim.
+  
+
+image::images/senaryo1/userver1ip.png[]
+
+ userver1 terminal ekranında:
+hostname –I yazarak IP adresimi buldum.(192.168.31.3)
+
+SSH
+
+Ubuntu Server kurulumu sırasında SSH bağlantısı için gerekli yüklemeleri otomatik olarak yaptığımdan ayrıca bir yükleme yapmama gerek kalmadı.
+
+image::images/senaryo1/userver1ssh.png[]
+
+ Host bilgisayarın terminal ekranında:
+ssh gorur@192.168.31.3 yazarak SSH bağlantısı yapılabildiğini gösterdim.
+
+PİNG
+
+image::images/senaryo1/userver1ping.png[]
+
+ Host(kullandığım) bilgisayardan:
+ping ip adresi (192.168.31.3) komutu ile  SSHla bağlandığım sanal makineye ping yapıp yapamadığımı kontrol ettim,ping yapabildiğimi gösterdim.
+
+
+=== SENARYO 2
+
+Dahili Ağ Bağdaştırıcı ile Host-Guest,Guest-Guest Bağlantısı
+
+Senaryo gereği Ubuntu Serverların ipleri:
+
+userver1 : 192.168.8.6
+
+userver2 : 192.168.8.7
+
+userver3 : 192.168.8.8
+
+image::images/senaryo2/userverdahili.png[]
+
+image::images/senaryo2/userver2dahili.png[]
+
+image::images/senaryo2/userver3dahili.png[]
+
+ userver1, userver2 ve userver3 guest makinelerim için ağ bağdaştırıcı ayarlarını dahili ağ olarak seçtim.
+
+Netplan Ayarları
+
+yaml formatındaki /etc/netplan/50-cloud-init.yaml dosyasını dhcp olmadan statik bir IP alıyoruz.
+
+image::images/senaryo2/yaml.png[]
+
+ userver1,userver2 ve userver3 terminalinde:
+ $ sudo nano /etc/netplan/50-cloud-init.yaml komutu ile dosyayı açtım.
+ 
+ 
+image::images/senaryo2/userver1netplan.png[]
+
+ userver1 IP adresini statik olarak verilen koşul gereği 192.168.8.6 olarak ayarladım.
+
+
+image::images/senaryo2/userver1ip.png[]
+
+ $ sudo netplan generate komutundan sonra $ sudo netplan apply ile statik IP atamamı uyguladım ve artık IP adresimin 192.168.8.6 olduğunu gördüm.
+ 
+image::images/senaryo2/userver2netplan.png[]
+
+ userver2 IP adresini statik olarak verilen koşul gereği 192.168.8.7 olarak ayarladım.
+
+image::images/senaryo2/userver2ip.png[]
+
+ $ sudo netplan generate komutundan sonra $ sudo netplan apply ile statik IP atamamı uyguladım ve artık IP adresimin 192.168.8.7 olduğunu gördüm.
+ 
+image::images/senaryo2/userver3netplan.png[]
+
+ userver3 IP adresini statik olarak verilen koşul gereği 192.168.8.8 olarak ayarladım. 
+
+image::images/senaryo2/userver3ip.png[]
+
+ $ sudo netplan generate komutundan sonra $ sudo netplan apply ile statik IP atamamı uyguladım ve artık IP adresimin 192.168.8.8 olduğunu gördüm.
+ 
+SSH
+
+SSH server yüklediğimiz için ve diğer makineler klon olduğu için ayrıca yükleme yapmaya gerek yoktur.
+Guestler arası SSH bağlantısı yapılabilmektedir.
+
+image::images/senaryo2/ssh13.png[]
+ 
+ userver1 sanal makinesinde ssh gorur@192.168.8.8 komutu userver3 ile SSH bağlantısı yaptım.
+ 
+
+image::images/senaryo2/ssh12.png[]
+
+ userver1 sanal makinesinde ssh gorur@192.168.8.7 komutu userver2 ile SSH bağlantısı yaptım.
+ 
+image::images/senaryo2/ssh32.png[]
+
+ userver3 sanal makinesinde ssh gorur@192.168.8.7 komutu userver2 ile SSH bağlantısı yaptım.
+ 
+ 
+
+Dahili ağ bağdaştırıcıda hosttan guestlere SSH bağlantısı yapmak mümkün değildir.
+
+image::images/senaryo2/host-guest1.png[]
+
+image::images/senaryo2/host-guest2.png[]
+
+image::images/senaryo2/host-guest3.png[]
+
+ Host bilgisayardan userver1,userver2 ve userver3 sanal makinelerine SSH yapamadığımı sırasıyla gösterdim.
+
+PİNG
+
+Guestler birbirine ulaşabildiği için birbirine ping yapabilmeleri mümkündür.
+
+image::images/senaryo2/ping1.png[]
+
+image::images/senaryo2/ping2.png[]
+
+image::images/senaryo2/ping3.png[]
+
+SCP ile Dosya Gönderimi
+
+image::images/senaryo2/touch.png[]
+
+ userver1 bilgisayarında $ touch komutu ile dosya ismi fatos.txt, gorur.txt ve 170201068.txt şeklinde olan dosyalar oluşturdum ve dosyaların varlığını kontrol etmek için $ ls komutunu kullandım.
+ 
+image::images/senaryo2/scp.png[]
+
+ $ scp 170201068.txt fatos.tct gorur.txt gorur@192.168.8.7:/home/gorur/ ile oluşturduğum dosyaları SCP protokolünü kullanarak userver2 bilgisayarına gönderdim.
+ 
+ 
+ userver2 bilgisayarına dosya gönderim işlemi gerçekleşmiş mi diye kontrol etmek için $ ls komutunu kullandım ve gönderimin başarılı bir şekilde gerçekleştiğini gördüm.
+ 
+ 
+ 
+=== SENARYO 3
+
+=====
+
+IP:
+
+uPC1: NAT(10.0.2.15)
+      dahili1(192.168.1.1)
+      
+uPC2: NAT(10.0.2.15)
+      dahili2(192.168.2.1)
+      
+userver1: NAT(10.0.2.15)
+          dahili1(192.168.1.254)
+          dahili3(192.168.100.1)
+          
+userver2: NAT(10.0.2.15)
+          dahili1(192.168.2.254)
+          dahili3(192.168.100.2)
+
+=====
+
+image::images/senaryo3/ubuntussh.png[]
+
+  userver1 olarak isimlendirdiği Ubuntu Server sanal makinesine,Ubuntu desktopla NAT bağlantı ile erişebilmek için gerekli port yönlendirmesini yaptım.Anamakine b.noktasını 8888,misafir b.noktasını 22 olarak ayarladım.
+
+image::images/senaryo3/sshla.png[]
+  
+  ssh localhost -p 8888 -l gorur komutu ile Ubuntu Desktop ile Ubuntu Server sanal makineme bağlandım.(Amacım daha kolay kopyala-yapıştır işlemlerini yapabilmek.)
+  
+
+QUAGGA KULLANARAK LİNUX YÖNLENDİRİCİ AĞI
+
+QUAGGA YÜKLEME 
+
+[source,]
+----
+#!/bin/bash
+# quagga installer
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
+sudo apt install quagga quagga-doc
+sudo cat > /etc/quagga/daemons << EOF
+zebra=yes
+bgpd=no
+ospfd=yes
+ospf6d=no
+ripd=no
+ripngd=no
+isisd=no
+babeld=no
+EOF
+
+sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+
+sudo cp /usr/share/doc/quagga-core/examples/vtysh.conf.sample /etc/quagga/vtysh.conf
+sudo cp /usr/share/doc/quagga-core/examples/zebra.conf.sample /etc/quagga/zebra.conf
+sudo cp /usr/share/doc/quagga-core/examples/bgpd.conf.sample /etc/quagga/bgpd.conf
+sudo chown quagga:quagga /etc/quagga/*.conf
+sudo chown quagga:quaggavty /etc/quagga/vtysh.conf
+sudo chmod 640 /etc/quagga/*.conf
+
+sudo service zebra start
+sudo service bgpd start
+
+sudo systemctl enable zebra.service
+sudo systemctl enable bgpd.service
+
+sudo echo 'VTYSH_PAGER=more' >>/etc/environment 
+sudo echo 'export VTYSH_PAGER=more' >>/etc/bash.bashrc
+----
+
+image::images/senaryo3/installquagga.png[]
+
+ Quagga paketini kurdum.
+
+image::images/senaryo3/daemons.png[]
+
+  etc/quagga/daemons dosyasını düzenledim.
+
+image::images/senaryo3/config.png[]
+
+  Zebra ve ospfd için yapılandırma dosyaları oluşturdum.
+
+image::images/senaryo3/config2.png[]
+
+  Vtysh END probleminden kaçınmak için ortam değişkenlerini ayarladım.
+
+image::images/senaryo3/vtysh.png[]
+
+  $sudo vtysh komutu ile Quagga'yı başlattım.
+  
+  
+
+ROUTER YAPILANDIRMA
+
+Oluşturulacak routerlar için yapılandırma ayarları:
+[source,]
+----
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
+cat >> /etc/quagga/ospfd.conf << EOF
+interface enp0s8
+interface enp0s9
+interface lo
+router ospf
+ passive-interface enp0s8
+ network 192.168.1.0/24 area 0.0.0.0
+ network 192.168.100.0/24 area 0.0.0.0
+line vty
+EOF
+
+cat >> /etc/quagga/zebra.conf << EOF
+interface enp0s8
+ ip address 192.168.1.254/24
+ ipv6 nd suppress-ra
+interface enp0s9
+ ip address 192.168.100.1/24
+ ipv6 nd suppress-ra
+interface lo
+ip forwarding
+line vty
+EOF
+
+sudo service zebra restart
+sudo service bgpd restart
+----
+
+image::images/senaryo3/router1.png[]
+
+image::images/senaryo3/router11.png[]
+
+ Klonlanacak routerlar için gerekli config ayarlamalarını yapmış oldum.
+ 
+image::images/senaryo3/router1klon.png[]
+
+image::images/senaryo3/router2klon.png[]
+
+image::images/senaryo3/baglantılı.png[]
+
+ Ubuntu Serverdan birbirine bağlantılı çoğaltma ile router1 ve router2 adında iki yönlendirici klonladım.
+ 
+ 
+image::images/senaryo3/router1nat.png[]
+
+ Senaryo gereği bağdaştırıcı 1'i NAT olarak ayarladım.
+
+image::images/senaryo3/router1dahili1.png[]
+  
+  Senaryo gereği bağdaştırıcı 2'yi Dahili Ağ yapıp dahili1 olarak isimlendirdim.
+  
+
+image::images/senaryo3/router1dahili3.png[]
+ 
+  Senaryo gereği bağdaştırıcı 3'ü Dahili Ağ yapıp dahili3 olarak isimlendirdim.
+
+image::images/senaryo3/router2nat.png[]
+
+ Senaryo gereği bağdaştırıcı 1'i NAT olarak ayarladım.
+
+image::images/senaryo3/router2dahili2.png[]
+  
+  Senaryo gereği bağdaştırıcı 2'yi Dahili Ağ yapıp dahili2 olarak isimlendirdim.
+  
+
+image::images/senaryo3/router2dahili3.png[]
+ 
+  Senaryo gereği bağdaştırıcı 3'ü Dahili Ağ yapıp dahili3 olarak isimlendirdim.
+  
+router2 için yapılandırma ayarları: 
+[source,]
+----
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
+cat >> /etc/quagga/ospfd.conf << EOF
+interface enp0s8
+interface enp0s9
+interface lo
+router ospf
+ passive-interface enp0s8
+ network 192.168.2.0/24 area 0.0.0.0
+ network 192.168.100.0/24 area 0.0.0.0
+line vty
+EOF
+
+cat >> /etc/quagga/zebra.conf << EOF
+interface enp0s8
+ ip address 192.168.2.254/24
+ ipv6 nd suppress-ra
+interface enp0s9
+ ip address 192.168.100.2/24
+ ipv6 nd suppress-ra
+interface lo
+ip forwarding
+line vty
+EOF
+
+sudo service zebra restart
+sudo service bgpd restart
+----
+ 
+image::images/senaryo3/ospfd.png[]
+
+image::images/senaryo3/ospfd1.png[]
+
+  /etc/quagga/ospfd.conf dosyasının içini router2'ye göre düzenleyip kaydettim.
+  
+
+image::images/senaryo3/zebra.png[]
+
+image::images/senaryo3/zebra1.png[]
+
+  /etc/quagga/zebra.conf dosyasının içini router2'ye göre düzenleyip kaydettim.
+  
+
+image::images/senaryo3/restart.png[]
+
+ Yapılan ayarlamaları yeniden başlattım.
+ 
+
+image::images/senaryo3/router1ip.png[]
+
+ Yaptığım düzenlemeler sonrası router1 ip'sini kontrol ettim.
+ 
+image::images/senaryo3/router2ip.png[]
+
+ Yaptığım düzenlemler sonrası router2 ip'sini kontrol ettim.
+ 
+Netplan Ayarları
+
+image::images/senaryo3/upc1nat.png[]
+
+image::images/senaryo3/upc1dahili.png[]
+
+image::images/senaryo3/upc2nat.png[]
+
+image::images/senaryo3/upc2dahili.png[]
+
+
+
+
+yaml formatındaki /etc/netplan/50-cloud-init.yaml dosyasını dhcp olmadan statik bir IP alıyoruz.
+
+image::images/senaryo3/yaml1.png[]
+
+ uPC1 sanal makinesinde:
+ $ sudo nano /etc/netplan/50-cloud-init.yaml komutu ile dosyayı açtım.
+ 
+ 
+image::images/senaryo3/upc1netplan.png[]
+
+ uPC1 IP adresini statik olarak belirlediğim koşula göre ayarladım.
+
+
+image::images/senaryo3/upc1apply.png[]
+
+ $ sudo netplan generate komutundan sonra $ sudo netplan apply ile statik IP atamamı uyguladım.
+
+
+image::images/senaryo3/yaml2.png[]
+
+ uPC2 sanal makinesinde:
+ $ sudo nano /etc/netplan/50-cloud-init.yaml komutu ile dosyayı açtım.
+ 
+ 
+image::images/senaryo3/upc2netplan.png[]
+
+ uPC2 IP adresini statik olarak belirlediğim koşula göre ayarladım.
+
+
+image::images/senaryo3/upc2apply.png[]
+
+ $ sudo netplan generate komutundan sonra $ sudo netplan apply ile statik IP atamamı uyguladım.
+ 
+
+TRACEROUTE
+
+Traceroute komutu ile paketlerin izlediği yolun takibini yapabiliriz.
+
+image::images/senaryo3/traceroute.png[]
+
+ $ sudo apt-get install traceroute ile traceroute yükledim.
+ 
+ 
+image::images/senaryo3/upc1-router1.png[]
+
+image::images/senaryo3/router1trace.png[]
+
+ uPC1 ----> router1
+
+image::images/senaryo3/upc1-router2.png[]
+
+image::images/senaryo3/router2trace.png[]
+
+ uPC1 ----> router2
+ 
+image::images/senaryo3/upc1-upc2.png[]
+
+image::images/senaryo3/upc2trace.png[]
+
+ uPC1 ----> uPC2
+
+=====
+NETWORK AĞ GRAFİĞİ
+
+image::images/senaryo3/networkgrafik.png[]
+
+=====
